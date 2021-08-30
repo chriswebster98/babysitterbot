@@ -1,18 +1,33 @@
 import os
 import discord
+import logging
+from discord.ext import commands
 from dotenv import load_dotenv
-
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_SERVER')
+from cogs.swearsitter import SwearSitter
 
 
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print('Logged on as {0}!'.format(self.user))
 
-    async def on_message(self, message):
-        print('Message from {0.author}: {0.content}'.format(message))
+def main():
+    # get env data for server / bot
+    load_dotenv()
+    TOKEN = os.getenv('DISCORD_TOKEN')
+    GUILD = os.getenv('DISCORD_SERVER')
 
-client = MyClient()
-client.run(TOKEN)
+    logging.basicConfig(level=logging.INFO)
+
+    # configure bot
+    intents = discord.Intents.default()
+    client = commands.Bot(command_prefix="?", intents=intents)
+
+    @client.event
+    async def on_ready():
+        print(f"{client.user.name} has connected to Discord")
+
+    # load in Cogs
+    client.load_extension("cogs.swearsitter")
+    
+    # start bot
+    client.run(TOKEN)
+
+if __name__ == "__main__":
+    main()
